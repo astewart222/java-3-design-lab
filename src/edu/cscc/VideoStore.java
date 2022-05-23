@@ -15,14 +15,15 @@ public class VideoStore {
      * @return The singleton instance.
      */
     private static VideoStore instance;
-    private static CustomerRepository customerRepository;
+    private static CustomerRepository customerRepository= new CustomerRepositoryImpl();
 
     private VideoStore(CustomerRepository customerRepository){
+
     }
 
     public static VideoStore getInstance() {
         if (instance == null){
-            customerRepository = new CustomerRepositoryImpl();
+            //customerRepository = new CustomerRepositoryImpl();
             instance = new VideoStore(customerRepository);
         }
         return instance;

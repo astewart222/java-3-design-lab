@@ -15,7 +15,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     public Customer create(Customer customer) throws DuplicateCustomerException {
         boolean foundMatch = customers.stream()
-                .anyMatch(customer1 -> customer1.getEmailAddress() == customer.getEmailAddress());
+                .anyMatch(customer1 -> customer1.getEmailAddress().equals(customer.getEmailAddress()));
 
         if (foundMatch) {
             throw new DuplicateCustomerException(customer.getEmailAddress());
@@ -31,16 +31,24 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                 .filter(customer -> customer.getAccountNumber() == accountNumber)
                 .findFirst();
 
-        return accountFound.get();
+        if (accountFound.isPresent()) {
+            return accountFound.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Customer findByEmailAddress(String emailAddress) {
         Optional<Customer> emailFound = customers.stream()
-                .filter(customer -> customer.getEmailAddress().toLowerCase() == emailAddress.toLowerCase())
+                .filter(customer -> customer.getEmailAddress().toLowerCase().equals(emailAddress.toLowerCase()))
                 .findFirst();
 
-        return emailFound.get();
+        if (emailFound.isPresent()) {
+            return emailFound.get();
+        } else {
+            return null;
+        }
     }
 
     public void update(Customer customer) throws DuplicateCustomerException, CustomerNotFoundException {
@@ -50,12 +58,12 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
         if (outdatedCustomer.isPresent()){
             //Found the customer. If the email has changed, make sure it doesn't match any other customer
-            if (outdatedCustomer.get().getEmailAddress() == customer.getEmailAddress()){
+            if (outdatedCustomer.get().getEmailAddress().equals(customer.getEmailAddress())){
                 outdatedCustomer.get().setLastName(customer.getLastName());
                 outdatedCustomer.get().setFirstName(customer.getLastName());
             } else {
                 boolean foundMatch = customers.stream()
-                        .anyMatch(customer1 -> customer1.getEmailAddress() == customer.getEmailAddress());
+                        .anyMatch(customer1 -> customer1.getEmailAddress().equals(customer.getEmailAddress()));
 
                 if (foundMatch) {
                     throw new DuplicateCustomerException(customer.getEmailAddress());
