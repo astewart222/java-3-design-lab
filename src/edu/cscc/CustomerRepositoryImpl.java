@@ -48,15 +48,22 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                 .filter(customer1 -> customer1.getAccountNumber() == customer.getAccountNumber())
                 .findFirst();
 
-        if (outdatedCustomer.get() != null){
-            boolean foundMatch = customers.stream()
-                    .anyMatch(customer1 -> customer1.getEmailAddress() == customer.getEmailAddress());
-
-            if (foundMatch) {
-                throw new DuplicateCustomerException(customer.getEmailAddress());
+        if (outdatedCustomer.isPresent()){
+            //Found the customer. If the email has changed, make sure it doesn't match any other customer
+            if (outdatedCustomer.get().getEmailAddress() == customer.getEmailAddress()){
+                outdatedCustomer.get().setLastName(customer.getLastName());
+                outdatedCustomer.get().setFirstName(customer.getLastName());
             } else {
-                customers.remove(outdatedCustomer);
-                customers.add(customer);
+                boolean foundMatch = customers.stream()
+                        .anyMatch(customer1 -> customer1.getEmailAddress() == customer.getEmailAddress());
+
+                if (foundMatch) {
+                    throw new DuplicateCustomerException(customer.getEmailAddress());
+                } else {
+                    outdatedCustomer.get().setLastName(customer.getLastName());
+                    outdatedCustomer.get().setFirstName(customer.getLastName());
+                    outdatedCustomer.get().setEmailAddress(customer.getEmailAddress());
+                }
             }
 
         } else {
@@ -69,7 +76,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                 .filter(customer1 -> customer1.getAccountNumber() == accountNumber)
                 .findFirst();
 
-        if (customer.get() != null){
+        if (customer.isPresent()){
             customers.remove(customer);
             return  true;
         } else {
