@@ -1,5 +1,6 @@
 package edu.cscc;
 
+import java.util.HashSet;
 import java.util.UUID;
 
 /**
@@ -13,10 +14,19 @@ public class VideoStore {
      * Get the singleton instance of the VideoStore.
      * @return The singleton instance.
      */
-    public static VideoStore getInstance() {
-        return null;
+    private static VideoStore instance;
+    private static CustomerRepository customerRepository;
+
+    private VideoStore(CustomerRepository customerRepository){
     }
 
+    public static VideoStore getInstance() {
+        if (instance == null){
+            customerRepository = new CustomerRepositoryImpl();
+            instance = new VideoStore(customerRepository);
+        }
+        return instance;
+    }
     /**
      * Create a customer using the given parameters. This method will throw a {@link DuplicateCustomerException} when
      * an attempt to create a {@link Customer} with the same email address occurs.
@@ -27,18 +37,16 @@ public class VideoStore {
      * @throws DuplicateCustomerException
      */
     public UUID createCustomer(String firstName, String lastName, String emailAddress) throws DuplicateCustomerException {
-        return null;
+        return customerRepository.create(new Customer(UUID.randomUUID(), firstName, lastName, emailAddress)).getAccountNumber();
     }
-
     /**
      * Finds a customer by their email address.
      * @param emailAddress The email address of the customer to search for.
      * @return The {@link Customer} that is found, or null if one couldn't be found.
      */
     public Customer findCustomerByEmailAddress(String emailAddress) {
-        return null;
+        return customerRepository.findByEmailAddress(emailAddress);
     }
-
     /**
      * Get a customer by the accountNumber. This method throws a {@link CustomerNotFoundException} when the customer
      * cannot be found by account number.
@@ -47,7 +55,7 @@ public class VideoStore {
      * @throws CustomerNotFoundException
      */
     public Customer getCustomer(String input) throws CustomerNotFoundException {
-        return null;
+        return customerRepository.read(UUID.fromString(input));
     }
 
     /**
@@ -64,9 +72,9 @@ public class VideoStore {
      * @throws DuplicateCustomerException
      */
     public void updateCustomer(String accountNumber, String firstName, String lastName, String emailAddress) throws CustomerNotFoundException, DuplicateCustomerException {
-
+        Customer customerToUpdate = new Customer(UUID.fromString(accountNumber),firstName, lastName, emailAddress);
+        customerRepository.update(customerToUpdate);
     }
-
     /**
      * Delete a {@link Customer} by their account number.
      * This method throws a {@link CustomerNotFoundException} when the customer could not be found by account number.
@@ -75,6 +83,6 @@ public class VideoStore {
      * @throws CustomerNotFoundException
      */
     public boolean deleteCustomer(String input) throws CustomerNotFoundException {
-        return false;
+        return customerRepository.delete(UUID.fromString(input));
     }
 }
